@@ -93,24 +93,26 @@ jobs:
 
   deploy:
     name: Deploy to Kubernetes
-    runs-on: ubuntu-latest
+    # runs-on: ubuntu-latest
+    runs-on: [self-hosted, local-dev]
     needs: docker
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up kubeconfig
-      uses: azure/k8s-set-context@v3
-      with:
-        kubeconfig: ${{ secrets.KUBE_CONFIG }}
+    # - name: Set up kubeconfig
+    #   uses: azure/k8s-set-context@v3
+    #   with:
+    #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
     
     - name: Update Kubernetes deployment
+      shell: bash
       run: |
-        # Replace image in kubernetes/product-service/deployment.yaml
+        eecho "INFO: Replacing image in Kubernetes deployment manifest..."
         sed -i 's|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest|' kubernetes/product-service/deployment.yaml
         
-        # Apply Kubernetes manifests
+        echo "Applying Kubernetes manifests..."
         kubectl apply -f kubernetes/base/namespace.yaml
         kubectl apply -f kubernetes/product-service/configmap.yaml
         kubectl apply -f kubernetes/product-service/secret.yaml
@@ -120,5 +122,5 @@ jobs:
         kubectl apply -f kubernetes/redis/deployment.yaml
         kubectl apply -f kubernetes/redis/service.yaml
         
-        # Verify deployment
+        echo "Verifying deployment..."
         kubectl rollout status deployment/product-service -n product-namespace
