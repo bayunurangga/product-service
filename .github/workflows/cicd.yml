@@ -107,10 +107,18 @@ jobs:
     #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
     
     - name: Update Kubernetes deployment
-      shell: bash
+      shell: pwsh
       run: |
-        eecho "INFO: Replacing image in Kubernetes deployment manifest..."
-        sed -i 's|image: .*|image: ${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest|' kubernetes/product-service/deployment.yaml
+        Write-Host "INFO: Replacing image in Kubernetes deployment manifest..."
+        $deploymentFile = "kubernetes/product-service/deployment.yaml"
+        $newImage = "${{ secrets.DOCKERHUB_USERNAME }}/product-service:latest"
+
+        if (Test-Path $deploymentFile) {
+          (Get-Content $deploymentFile) | ForEach-Object { $_ -replace 'image: .*', "image: $newImage" } | Set-Content $deploymentFile
+        } else {
+          Write-Error "Deployment file not found: $deploymentFile"
+          exit 1
+        }
         
         echo "Applying Kubernetes manifests..."
         kubectl apply -f kubernetes/base/namespace.yaml
