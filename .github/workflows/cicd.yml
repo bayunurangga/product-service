@@ -107,7 +107,7 @@ jobs:
     #     kubeconfig: ${{ secrets.KUBE_CONFIG }}
     
     - name: Update Kubernetes deployment
-      shell: pwsh
+      shell: powershell
       run: |
         Write-Host "INFO: Replacing image in Kubernetes deployment manifest..."
         $deploymentFile = "kubernetes/product-service/deployment.yaml"
@@ -119,7 +119,7 @@ jobs:
           Write-Error "Deployment file not found: $deploymentFile"
           exit 1
         }
-        
+
         echo "Applying Kubernetes manifests..."
         kubectl apply -f kubernetes/base/namespace.yaml
         kubectl apply -f kubernetes/product-service/configmap.yaml
