@@ -41,8 +41,12 @@ jobs:
     
     - name: SonarQube Scan
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      run: mvn -B verify sonar:sonar \
+        -Dsonar.projectKey=bayunurangga_product-service \
+        -Dsonar.organization=bayunurangga \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.login=${SONAR_TOKEN}
       if: github.event_name != 'pull_request'
     
     - name: Upload artifact
